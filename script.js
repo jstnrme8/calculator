@@ -12,8 +12,6 @@ const pointButton = document.getElementById('pointBtn');
 const lastOperationScreen = document.getElementById('lastOperationScreen');
 const currentOperationScreen = document.getElementById('currentOperationScreen');
 
-//equalsButton.addEventListener('click', evaluate);
-
 numberButtons.forEach((button) =>
     button.addEventListener('click', () => appendNumber(button.textContent))
 )
@@ -22,8 +20,11 @@ operatorButtons.forEach((button) =>
     button.addEventListener('click', () => setOperation(button.textContent))
 )
 
+window.addEventListener('keydown', handleKeyboardInput);
 equalsButton.addEventListener('click', evaluate);
 clearButton.addEventListener('click', clear);
+deleteButton.addEventListener('click', deleteNumber);
+pointButton.addEventListener('click', appendPoint);
 
 function appendNumber(number) {
     if (currentOperationScreen.textContent === '0' || shouldResetScreen)
@@ -60,12 +61,41 @@ function evaluate() {
     }
     secondOperand = currentOperationScreen.textContent;
     currentOperationScreen.textContent = roundResult(operate(currentOperation, firstOperand, secondOperand));
-    lastOperationScreen.textContent = `${firstOperand} ${currentOperation}`;
+    lastOperationScreen.textContent = `${firstOperand} ${currentOperation} ${secondOperand} =`;
     currentOperation = null;
 }
 
 function roundResult(number) {
     return Math.round(number * 1000) / 1000;
+}
+
+function deleteNumber() {
+    currentOperationScreen.textContent = currentOperationScreen.textContent.toString().slice(0, -1);
+}
+
+function appendPoint() {
+    if (shouldResetScreen) resetScreen()
+    if (currentOperationScreen.textContent === '')
+        currentOperationScreen.textContent = '0';
+    if (currentOperationScreen.textContent.includes('.')) return;
+    currentOperationScreen.textContent += '.';
+}
+
+function handleKeyboardInput(e) {
+    if (e.key >= 0 && e.key <= 9) appendNumber(e.key)
+    if (e.key === '.') appendPoint()
+    if (e.key === '=' || e.key === 'Enter') evaluate()
+    if (e.key === 'Backspace') deleteNumber()
+    if (e.key === 'Escape') clear()
+    if (e.key === '+' || e.key === '-' || e.key === '*' || e.key === '/')
+        setOperation(convertOperator(e.key))
+}
+
+function convertOperator(keyboardOperator) {
+    if (keyboardOperator === '/') return '÷'
+    if (keyboardOperator === '*') return '×'
+    if (keyboardOperator === '-') return '−'
+    if (keyboardOperator === '+') return '+'
 }
 
 
